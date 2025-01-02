@@ -18,7 +18,7 @@ export const RoutingPage = () => {
             }}>
                 <img src={BulbIcon} alt="Bulb Icon" className='w-full h-20 mt-3' />
                 <div className='text-lg font-semibold mt-auto text-amber-500 text-center'>
-                    Lighting Control
+                    Управление освещением
                 </div>
 
             </Link>
@@ -29,7 +29,7 @@ export const RoutingPage = () => {
             }}>
                 <img src={AdminIcon} alt="Bulb Icon" className='w-full h-20 mt-3' />
                 <div className='text-lg font-semibold mt-auto text-amber-500 text-center'>
-                    Admin Panel
+                    Панель администратора
                 </div>
 
             </Link>
