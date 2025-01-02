@@ -1,8 +1,7 @@
-import React from 'react'
-import BgImg from '../assets/smart.jpg'
-import BulbIcon from '../assets/bulb.svg'
-import AdminIcon from '../assets/admin.svg'
 import { Link } from 'react-router-dom'
+import AdminIcon from '../assets/admin.svg'
+import BulbIcon from '../assets/bulb.svg'
+import BgImg from '../assets/smart.jpg'
 export const RoutingPage = () => {
     return (
         <div className='flex justify-center items-center flex-1 h-full gap-20' style={{

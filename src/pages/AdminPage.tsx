@@ -1,8 +1,7 @@
-import { Button } from '@/components/ui/button'
-import { TableContainer } from '@/entities/Lighting/TableContainer'
-import React from 'react';
-import { useNavigate } from "react-router-dom";
 import BackIcon from "@/assets/back.svg";
+import { Button } from '@/components/ui/button';
+import { TableContainer } from '@/entities/Lighting/TableContainer';
+import { useNavigate } from "react-router-dom";
 export const AdminPage = () => {
     const navigate =useNavigate();
   return (
