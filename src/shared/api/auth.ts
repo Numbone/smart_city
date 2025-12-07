@@ -6,8 +6,8 @@ export const login = async (email: string, password: string):Promise<IAuthRespon
   return response.data
 }
 
-export const register = async (email: string, password: string) => {
-  const response = await apiService.post('/auth/email/register', { email, password })
+export const register = async (email: string, password: string , firstName: string, lastName: string) => {
+  const response = await apiService.post('/auth/email/register', { email, password, firstName, lastName })
   return response.data
 }
 

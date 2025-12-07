@@ -1,4 +1,3 @@
-import BackIcon from "@/assets/back.svg";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { getAllWaters, IWater, waterService } from "@/shared/api/waters";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import clsx from "clsx";
 import { divIcon } from "leaflet";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -20,8 +20,11 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import { useNavigate } from "react-router-dom";
 
-const getCustomIcon = (resourceType: "lake" | "reservoir" | "channel", waterType: "fresh" | "salty") => {
+const getCustomIcon = (resourceType: "lake" | "reservoir" | "channel", waterType: "fresh" | "salty", priorityLevel: "high" | "medium" | "low") => {
     const color = waterType === "fresh" ? "#3b82f6" : "#0891b2"; // синий для пресной, бирюзовый для соленой
+    
+    // Цвет рамки в зависимости от приоритета
+    const borderColor = priorityLevel === "high" ? "#ef4444" : priorityLevel === "medium" ? "#f59e0b" : "#22c55e";
     
     let iconSvg = "";
     
@@ -62,9 +65,22 @@ const getCustomIcon = (resourceType: "lake" | "reservoir" | "channel", waterType
                 align-items: center;
                 justify-content: center;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                border: 2px solid ${color};
+                border: 3px solid ${borderColor};
+                position: relative;
             ">
                 ${iconSvg}
+                ${priorityLevel === "high" ? `
+                    <div style="
+                        position: absolute;
+                        top: -4px;
+                        right: -4px;
+                        background: ${borderColor};
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 50%;
+                        border: 2px solid white;
+                    "></div>
+                ` : ""}
             </div>
         `,
         iconSize: [32, 32],
@@ -73,12 +89,59 @@ const getCustomIcon = (resourceType: "lake" | "reservoir" | "channel", waterType
     });
 };
 
+const getTechnicalConditionColor = (technicalCondition: number): string => {
+    switch (technicalCondition) {
+        case 1: return "border-green-600";
+        case 2: return "border-lime-500";
+        case 3: return "border-yellow-500";
+        case 4: return "border-orange-500";
+        case 5: return "border-red-600";
+        default: return "border-gray-400";
+      }
+};
+
+// Функция расчёта приоритета
+const calculatePriorityScore = (technicalCondition: number, passportDate: string): number => {
+    const passportYear = new Date(passportDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const passportAge = currentYear - passportYear;
+    
+    // PriorityScore = (6 - состояние) * 3 + возраст паспорта в годах
+    const score = (6 - technicalCondition) * 3 + passportAge;
+    return score;
+};
+
+// Функция определения уровня приоритета
+const getPriorityLevel = (score: number): "high" | "medium" | "low" => {
+    if (score >= 12) return "high";
+    if (score >= 6) return "medium";
+    return "low";
+};
+
+// Функция получения текста уровня приоритета
+const getPriorityLevelText = (level: "high" | "medium" | "low"): string => {
+    switch(level) {
+        case "high": return "Высокий";
+        case "medium": return "Средний";
+        case "low": return "Низкий";
+    }
+};
+
+// Функция получения цвета уровня приоритета
+const getPriorityColor = (level: "high" | "medium" | "low"): string => {
+    switch(level) {
+        case "high": return "#ef4444";
+        case "medium": return "#f59e0b";
+        case "low": return "#22c55e";
+    }
+};
+
 export const MapContainerPage = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [selectedWater, setSelectedWater] = useState<IWater | null>(null)
     const [page, setPage] = useState(0);
-    const [limit, setLimit] = useState(50);
+    const [limit] = useState(50);
     const [search, setSearch] = useState("");
     const [sortField, setSortField] = useState("priority");
     const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
@@ -205,10 +268,7 @@ export const MapContainerPage = () => {
         <div>
             <div className="absolute flex gap-2 p-4 rounded-2xl bg-white top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] shadow-lg">
                 <Button onClick={() => navigate(-1)} variant={"outline"} size="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-                </Button>
-                <Button variant="default" size="icon" onClick={() => { handleSheetOpen(); setSelectedWater(null); }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
                 </Button>
                 <Button variant={activeFiltersCount > 0 ? "default" : "outline"} size="icon" onClick={() => setOpenFilterSheet(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5H2"/><path d="M6 12h12"/><path d="M9 19h6"/></svg>
@@ -229,6 +289,28 @@ export const MapContainerPage = () => {
                 </div>
             </div>
 
+            {/* Легенда приоритетов */}
+            <div className="absolute bottom-10 left-10 z-[9999] bg-white p-4 rounded-lg shadow-lg">
+                <h4 className="font-semibold text-sm mb-2">Приоритет обследования</h4>
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#ef4444" }}></div>
+                        <span className="text-xs">Высокий (≥12)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#f59e0b" }}></div>
+                        <span className="text-xs">Средний (6-11)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#22c55e" }}></div>
+                        <span className="text-xs">Низкий (&lt;6)</span>
+                    </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-3 border-t pt-2">
+                    Score = (6 - состояние) × 3 + возраст паспорта
+                </p>
+            </div>
+
             <MapContainer
                 center={[48.0196, 66.9237]}
                 zoom={5}
@@ -241,11 +323,19 @@ export const MapContainerPage = () => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <MarkerClusterGroup>
-                    {waters?.data?.map((obj) => (
+                    {waters?.data?.map((obj) => {
+                        const priorityScore = calculatePriorityScore(obj.technical_condition, obj.passport_date);
+                        const priorityLevel = getPriorityLevel(priorityScore);
+                        
+                        return (
                         <Marker
                             key={obj.id}
                             position={[obj.latitude, obj.longitude]}
-                            icon={getCustomIcon(obj.resource_type as "lake" | "reservoir" | "channel", obj.water_type as "fresh" | "salty")}
+                            icon={getCustomIcon(
+                                obj.resource_type as "lake" | "reservoir" | "channel", 
+                                obj.water_type as "fresh" | "salty",
+                                priorityLevel
+                            )}
                             eventHandlers={{
                                 mouseover: (e) => e.target.openPopup(),
                                 mouseout: (e) => e.target.closePopup(),
@@ -259,6 +349,14 @@ export const MapContainerPage = () => {
                                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                                     {obj.name}
                                 </h3>
+                                <div className="mb-3 p-2 rounded" style={{ backgroundColor: `${getPriorityColor(priorityLevel)}15`, border: `1px solid ${getPriorityColor(priorityLevel)}` }}>
+                                    <p className="text-sm font-semibold" style={{ color: getPriorityColor(priorityLevel) }}>
+                                        Приоритет: {getPriorityLevelText(priorityLevel)} (Score: {priorityScore})
+                                    </p>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        Расчёт: (6 - {obj.technical_condition}) × 3 + {new Date().getFullYear() - new Date(obj.passport_date).getFullYear()} лет = {priorityScore}
+                                    </p>
+                                </div>
                                 <p className="text-sm text-gray-600 mb-1">
                                     <strong>Регион:</strong> {obj.region}
                                 </p>
@@ -269,17 +367,23 @@ export const MapContainerPage = () => {
                                     <strong>Тип:</strong> {obj.resource_type}
                                 </p>
                                 <p className="text-sm text-gray-600 mb-1">
-                                    <strong>Приоритет:</strong> {obj.priority}
+                                    <strong>Техническое состояние:</strong> {obj.technical_condition}/5
+                                </p>
+                                <p className="text-sm text-gray-600 mb-1">
+                                    <strong>Дата паспорта:</strong> {obj.passport_date} ({new Date().getFullYear() - new Date(obj.passport_date).getFullYear()} лет)
                                 </p>
                             </Popup>
                         </Marker>
-                    ))}
+                        );
+                    })}
                 </MarkerClusterGroup>
             </MapContainer>
 
             {/* Sheet для создания/редактирования */}
-            <Sheet open={openSheet} onOpenChange={handleSheetOpen}>
-                <SheetContent className="z-[9999] overflow-y-auto">
+            <Sheet  open={openSheet} onOpenChange={handleSheetOpen}>
+                <SheetContent className={clsx("z-[9999] overflow-y-auto border border-4",
+                    getTechnicalConditionColor(selectedWater?.technical_condition || 0)
+                )   }>
                     <SheetHeader>
                         <SheetTitle>
                             {selectedWater ? "Информация о водном объекте" : "Создание водного объекта"}
@@ -375,23 +479,22 @@ export const MapContainerPage = () => {
                                         name="fauna"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <Select onValueChange={field.onChange} value={field.value.toString()} disabled={!!selectedWater}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Выбрать фауну" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectItem value="true">Есть</SelectItem>
-                                                            <SelectItem value="false">Нет</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormItem>
+                                    <Select onValueChange={field.onChange} value={field.value.toString()} disabled={!!selectedWater}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Выбрать фауну" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="true">Есть</SelectItem>
+                                            <SelectItem value="false">Нет</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    </FormItem>
                                         )}
                                     />
-                                  
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <Label>PDF</Label>
+                                    <Input {...register("pdf_url")} type="text" disabled={!!selectedWater} />
                                 </div>
                                 {!selectedWater && (
                                     <Button type="submit">Создать</Button>

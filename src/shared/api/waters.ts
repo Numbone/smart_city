@@ -48,6 +48,8 @@ export const getAllWaters = async (
       Object.entries(params).filter(([key, value]) => {
         // Для page и limit всегда отправляем (даже если 0)
         if (key === 'page' || key === 'limit') return true;
+
+        if (key === "fauna") return value === true || value === false;
         
         // Для boolean - отправляем только если true
         if (typeof value === 'boolean') return value === true;
