@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const getCustomIcon = (resourceType: "lake" | "reservoir" | "channel", waterType: "fresh" | "salty", priorityLevel: "high" | "medium" | "low") => {
     const color = waterType === "fresh" ? "#3b82f6" : "#0891b2"; // синий для пресной, бирюзовый для соленой
@@ -137,6 +138,7 @@ const getPriorityColor = (level: "high" | "medium" | "low"): string => {
 };
 
 export const MapContainerPage = () => {
+    const { t } = useTranslation()
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [selectedWater, setSelectedWater] = useState<IWater | null>(null)
@@ -285,29 +287,29 @@ export const MapContainerPage = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
                 </Button>
                 <div className="ml-2 text-sm text-gray-600 flex items-center px-3 bg-gray-100 rounded-lg">
-                    {isLoading ? "Загрузка..." : `Показано: ${waters?.data?.length || 0}`}
+                    {isLoading ? t('priorities.loading') : `${t('priorities.shown')}: ${waters?.data?.length || 0}`}
                 </div>
             </div>
 
             {/* Легенда приоритетов */}
             <div className="absolute bottom-10 left-10 z-[9999] bg-white p-4 rounded-lg shadow-lg">
-                <h4 className="font-semibold text-sm mb-2">Приоритет обследования</h4>
+                <h4 className="font-semibold text-sm mb-2">{t('priorities.priorityLegend')}</h4>
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#ef4444" }}></div>
-                        <span className="text-xs">Высокий (≥12)</span>
+                        <span className="text-xs">{t('priorities.high')} (≥12)</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#f59e0b" }}></div>
-                        <span className="text-xs">Средний (6-11)</span>
+                        <span className="text-xs">{t('priorities.medium')} (6-11)</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#22c55e" }}></div>
-                        <span className="text-xs">Низкий (&lt;6)</span>
+                        <span className="text-xs">{t('priorities.low')} (&lt;6)</span>
                     </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-3 border-t pt-2">
-                    Score = (6 - состояние) × 3 + возраст паспорта
+                    {t('priorities.scoreCalculation')}
                 </p>
             </div>
 
@@ -351,26 +353,26 @@ export const MapContainerPage = () => {
                                 </h3>
                                 <div className="mb-3 p-2 rounded" style={{ backgroundColor: `${getPriorityColor(priorityLevel)}15`, border: `1px solid ${getPriorityColor(priorityLevel)}` }}>
                                     <p className="text-sm font-semibold" style={{ color: getPriorityColor(priorityLevel) }}>
-                                        Приоритет: {getPriorityLevelText(priorityLevel)} (Score: {priorityScore})
+                                        {t('priorities.priority')}: {getPriorityLevelText(priorityLevel)} ({t('priorities.score')}: {priorityScore})
                                     </p>
                                     <p className="text-xs text-gray-600 mt-1">
-                                        Расчёт: (6 - {obj.technical_condition}) × 3 + {new Date().getFullYear() - new Date(obj.passport_date).getFullYear()} лет = {priorityScore}
+                                        {t('priorities.calculation')}: (6 - {obj.technical_condition}) × 3 + {new Date().getFullYear() - new Date(obj.passport_date).getFullYear()} {t('priorities.years')} = {priorityScore}
                                     </p>
                                 </div>
                                 <p className="text-sm text-gray-600 mb-1">
-                                    <strong>Регион:</strong> {obj.region}
+                                    <strong>{t('priorities.region')}:</strong> {obj.region}
                                 </p>
                                 <p className="text-sm text-gray-600 mb-1">
-                                    <strong>Координаты:</strong> {obj.latitude.toFixed(4)} N, {obj.longitude.toFixed(4)} E
+                                    <strong>{t('priorities.coordinates')}:</strong> {obj.latitude.toFixed(4)} N, {obj.longitude.toFixed(4)} E
                                 </p>
                                 <p className="text-sm text-gray-600 mb-1">
-                                    <strong>Тип:</strong> {obj.resource_type}
+                                    <strong>{t('priorities.type')}:</strong> {obj.resource_type}
                                 </p>
                                 <p className="text-sm text-gray-600 mb-1">
-                                    <strong>Техническое состояние:</strong> {obj.technical_condition}/5
+                                    <strong>{t('priorities.technicalCondition')}:</strong> {obj.technical_condition}/5
                                 </p>
                                 <p className="text-sm text-gray-600 mb-1">
-                                    <strong>Дата паспорта:</strong> {obj.passport_date} ({new Date().getFullYear() - new Date(obj.passport_date).getFullYear()} лет)
+                                    <strong>{t('priorities.passportDate')}:</strong> {obj.passport_date} ({new Date().getFullYear() - new Date(obj.passport_date).getFullYear()} {t('priorities.years')})
                                 </p>
                             </Popup>
                         </Marker>
@@ -386,33 +388,33 @@ export const MapContainerPage = () => {
                 )   }>
                     <SheetHeader>
                         <SheetTitle>
-                            {selectedWater ? "Информация о водном объекте" : "Создание водного объекта"}
+                            {selectedWater ? t('admin.informationAboutWaterObject') : t('admin.createWaterObject')}
                         </SheetTitle>
                         <SheetDescription>
-                            {selectedWater ? "Просмотр данных водного объекта" : "Заполните информацию о новом водном объекте"}
+                            {selectedWater ? t('admin.viewWaterObjectData') : t('admin.fillInformationAboutNewWaterObject')}
                         </SheetDescription>
                     </SheetHeader>
                     <Form {...form}>
                         <form onSubmit={handleSubmit(onSubmit)}>
                             <div className="flex flex-col gap-4 py-4">
                                 <div className="flex flex-col gap-2">
-                                    <Label>Наименование</Label>
+                                    <Label>{t('admin.name')}</Label>
                                     <Input {...register("name")} disabled={!!selectedWater} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Регион</Label>
+                                    <Label>{t('admin.region')}</Label>
                                     <Input {...register("region")} disabled={!!selectedWater} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Широта</Label>
+                                    <Label>{t('admin.latitude')}</Label>
                                     <Input {...register("latitude", { valueAsNumber: true })} type="number" step="any" disabled={!!selectedWater} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Долгота</Label>
+                                    <Label>{t('admin.longitude')}</Label>
                                     <Input {...register("longitude", { valueAsNumber: true })} type="number" step="any" disabled={!!selectedWater} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Тип воды</Label>
+                                    <Label>{t('admin.waterType')}</Label>
                                     <FormField
                                         control={control}
                                         name="water_type"
@@ -421,13 +423,13 @@ export const MapContainerPage = () => {
                                                 <Select onValueChange={field.onChange} value={field.value} disabled={!!selectedWater}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Выбрать тип воды" />
+                                                            <SelectValue placeholder={t('admin.selectWaterType')} />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
                                                         <SelectGroup>
-                                                            <SelectItem value="fresh">Пресная</SelectItem>
-                                                            <SelectItem value="salty">Соленая</SelectItem>
+                                                            <SelectItem value="fresh">{t('admin.fresh')}</SelectItem>
+                                                            <SelectItem value="salty">{t('admin.salty')}</SelectItem>
                                                         </SelectGroup>
                                                     </SelectContent>
                                                 </Select>
@@ -436,7 +438,7 @@ export const MapContainerPage = () => {
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Тип ресурса</Label>
+                                    <Label>{t('admin.resourceType')}</Label>
                                     <FormField
                                         control={control}
                                         name="resource_type"
@@ -445,14 +447,14 @@ export const MapContainerPage = () => {
                                                 <Select onValueChange={field.onChange} value={field.value} disabled={!!selectedWater}>
                                                     <FormControl>
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Выбрать тип ресурса" />
+                                                            <SelectValue placeholder={t('admin.selectResourceType')} />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
                                                         <SelectGroup>
-                                                            <SelectItem value="lake">Озеро</SelectItem>
-                                                            <SelectItem value="reservoir">Водохранилище</SelectItem>
-                                                            <SelectItem value="channel">Река/Канал</SelectItem>
+                                                            <SelectItem value="lake">{t('admin.lake')}</SelectItem>
+                                                            <SelectItem value="reservoir">{t('admin.reservoir')}</SelectItem>
+                                                            <SelectItem value="channel">{t('admin.channel')}</SelectItem>
                                                         </SelectGroup>
                                                     </SelectContent>
                                                 </Select>
@@ -461,19 +463,19 @@ export const MapContainerPage = () => {
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Приоритет</Label>
+                                    <Label>{t('admin.priority')}</Label>
                                     <Input {...register("priority", { valueAsNumber: true })} type="number" step="1" disabled={!!selectedWater} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Дата паспорта</Label>
+                                    <Label>{t('admin.passportDate')}</Label>
                                     <Input {...register("passport_date")} type="date" disabled={!!selectedWater} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Техническое состояние</Label>
+                                    <Label>{t('admin.technicalCondition')}</Label>
                                     <Input {...register("technical_condition", { valueAsNumber: true })} type="number" step="1" disabled={!!selectedWater} />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>Фауна</Label>
+                                    <Label>{t('admin.fauna')}</Label>
                                     <FormField
                                         control={control}
                                         name="fauna"
@@ -481,11 +483,11 @@ export const MapContainerPage = () => {
                                             <FormItem>
                                     <Select onValueChange={field.onChange} value={field.value.toString()} disabled={!!selectedWater}>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Выбрать фауну" />
+                                            <SelectValue placeholder={t('admin.selectFauna')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="true">Есть</SelectItem>
-                                            <SelectItem value="false">Нет</SelectItem>
+                                            <SelectItem value="true">{t('admin.yes')}</SelectItem>
+                                            <SelectItem value="false">{t('admin.no')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     </FormItem>
@@ -493,11 +495,11 @@ export const MapContainerPage = () => {
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <Label>PDF</Label>
+                                    <Label>{t('admin.pdfLink')}</Label>
                                     <Input {...register("pdf_url")} type="text" disabled={!!selectedWater} />
                                 </div>
                                 {!selectedWater && (
-                                    <Button type="submit">Создать</Button>
+                                    <Button type="submit">{t('admin.create')}</Button>
                                 )}
                             </div>
                         </form>
@@ -509,20 +511,20 @@ export const MapContainerPage = () => {
             <Sheet open={openSearchSheet} onOpenChange={setOpenSearchSheet}>
                 <SheetContent className="z-[9999]">
                     <SheetHeader>
-                        <SheetTitle>Поиск</SheetTitle>
-                        <SheetDescription>Введите название водного объекта</SheetDescription>
+                        <SheetTitle>{t('admin.search')}</SheetTitle>
+                        <SheetDescription>{t('admin.enterWaterObjectName')}</SheetDescription>
                     </SheetHeader>
                     <div className="flex flex-col gap-4 py-4">
                         <Input
-                            placeholder="Название..."
+                            placeholder={t('admin.name')}
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
                         <div className="flex gap-2">
-                            <Button onClick={handleSearch} className="flex-1">Найти</Button>
+                            <Button onClick={handleSearch} className="flex-1">{t('admin.search')}</Button>
                             <Button variant="outline" onClick={() => { setSearch(""); setSearchInput(""); setPage(0); }} className="flex-1">
-                                Сбросить
+                                {t('admin.reset')}
                             </Button>
                         </div>
                     </div>
@@ -533,32 +535,32 @@ export const MapContainerPage = () => {
             <Sheet open={openFilterSheet} onOpenChange={setOpenFilterSheet}>
                 <SheetContent className="z-[9999] overflow-y-auto">
                     <SheetHeader>
-                        <SheetTitle>Фильтры</SheetTitle>
+                        <SheetTitle>{t('admin.filters')}</SheetTitle>
                         <SheetDescription>
-                            Настройте параметры фильтрации {activeFiltersCount > 0 && `(активно: ${activeFiltersCount})`}
+                            {t('admin.adjustFilterParameters')} {activeFiltersCount > 0 && `(${t('admin.active')}: ${activeFiltersCount})`}
                         </SheetDescription>
                     </SheetHeader>
                     <div className="flex flex-col gap-4 py-4">
                         <div className="flex flex-col gap-2">
-                            <Label>Регион</Label>
+                            <Label>{t('admin.region')}</Label>
                             <Select value={region || "all"} onValueChange={(val) => setRegion(val === "all" ? "" : val)} defaultValue="all">
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Все регионы" />
+                                    <SelectValue placeholder={t('admin.allRegions')} />
                                 </SelectTrigger>
                                 <SelectContent className="z-[99999]">
-                                    <SelectItem value="all">Все регионы</SelectItem>
-                                    <SelectItem value="Акмолинская область">Акмолинская область</SelectItem>
-                                    <SelectItem value="Алматинская область">Алматинская область</SelectItem>
-                                    <SelectItem value="Атырауская область">Атырауская область</SelectItem>
-                                    <SelectItem value="Восточно-Казахстанская область">Восточно-Казахстанская область</SelectItem>
-                                    <SelectItem value="Жамбылская область">Жамбылская область</SelectItem>
-                                    <SelectItem value="Западно-Казахстанская область">Западно-Казахстанская область</SelectItem>
-                                    <SelectItem value="Карагандинская область">Карагандинская область</SelectItem>
-                                    <SelectItem value="Костанайская область">Костанайская область</SelectItem>
-                                    <SelectItem value="Кызылординская область">Кызылординская область</SelectItem>
-                                    <SelectItem value="Павлодарская область">Павлодарская область</SelectItem>
-                                    <SelectItem value="Туркестанская область">Туркестанская область</SelectItem>
-                                    <SelectItem value="Актюбинская область">Актюбинская область</SelectItem>
+                                    <SelectItem value="all">{t('admin.allRegions')}</SelectItem>
+                                    <SelectItem value="Акмолинская область">{t('admin.akmola')}</SelectItem>
+                                    <SelectItem value="Алматинская область">{t('admin.almaty')}</SelectItem>
+                                    <SelectItem value="Атырауская область">{t('admin.atyrau')}</SelectItem>
+                                    <SelectItem value="Восточно-Казахстанская область">{t('admin.eastKazakhstan')}</SelectItem>
+                                    <SelectItem value="Жамбылская область">{t('admin.zhambyl')}</SelectItem>
+                                    <SelectItem value="Западно-Казахстанская область">{t('admin.westKazakhstan')}</SelectItem>
+                                    <SelectItem value="Карагандинская область">{t('admin.karaganda')}</SelectItem>
+                                    <SelectItem value="Костанайская область">{t('admin.kostanay')}</SelectItem>
+                                    <SelectItem value="Кызылординская область">{t('admin.kyzylorda')}</SelectItem>
+                                    <SelectItem value="Павлодарская область">{t('admin.pavlodar')}</SelectItem>
+                                    <SelectItem value="Туркестанская область">{t('admin.turkestan')}</SelectItem>
+                                    <SelectItem value="Актюбинская область">{t('admin.aktobe')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -567,48 +569,48 @@ export const MapContainerPage = () => {
                             <Label>Тип ресурса</Label>
                             <Select value={resource_type || "all"} onValueChange={(val) => setResourceType(val === "all" ? "" : val)} defaultValue="all">
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Все типы" />
+                                    <SelectValue placeholder={t('admin.allTypes')} />
                                 </SelectTrigger>
                                 <SelectContent className="z-[99999]">
-                                    <SelectItem value="all">Все типы</SelectItem>
-                                    <SelectItem value="lake">Озеро</SelectItem>
-                                    <SelectItem value="reservoir">Водохранилище</SelectItem>
-                                    <SelectItem value="channel">Река/Канал</SelectItem>
+                                    <SelectItem value="all">{t('admin.allTypes')}</SelectItem>
+                                    <SelectItem value="lake">{t('admin.lake')}</SelectItem>
+                                    <SelectItem value="reservoir">{t('admin.reservoir')}</SelectItem>
+                                    <SelectItem value="channel">{t('admin.channel')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <Label>Тип воды</Label>
+                            <Label>{t('admin.waterType')}</Label>
                             <Select value={water_type || "all"} onValueChange={(val) => setWaterType(val === "all" ? "" : val)} defaultValue="all">
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Все типы воды" />
+                                    <SelectValue placeholder={t('admin.allWaterTypes')} />
                                 </SelectTrigger>
                                 <SelectContent className="z-[99999]">
-                                    <SelectItem value="all">Все типы воды</SelectItem>
-                                    <SelectItem value="fresh">Пресная</SelectItem>
-                                    <SelectItem value="salty">Соленая</SelectItem>
+                                    <SelectItem value="all">{t('admin.allWaterTypes')}</SelectItem>
+                                    <SelectItem value="fresh">{t('admin.fresh')}</SelectItem>
+                                    <SelectItem value="salty">{t('admin.salty')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <Label>Фауна</Label>
+                            <Label>{t('admin.fauna')}</Label>
                             <Select value={fauna === undefined ? "all" : fauna.toString()} onValueChange={(val) => setFauna(val === "all" ? undefined : val === "true")} defaultValue="all">
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Не важно" />
+                                    <SelectValue placeholder={t('admin.notImportant')} />
                                 </SelectTrigger>
                                 <SelectContent className="z-[99999]">
-                                    <SelectItem value="all">Не важно</SelectItem>
-                                    <SelectItem value="true">Есть</SelectItem>
-                                    <SelectItem value="false">Нет</SelectItem>
+                                    <SelectItem value="all">{t('admin.notImportant')}</SelectItem>
+                                    <SelectItem value="true">{t('admin.yes')}</SelectItem>
+                                    <SelectItem value="false">{t('admin.no')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="flex gap-2">
-                            <Button onClick={handleApplyFilters} className="flex-1">Применить</Button>
-                            <Button variant="outline" onClick={handleResetFilters} className="flex-1">Сбросить</Button>
+                            <Button onClick={handleApplyFilters} className="flex-1">{t('admin.apply')}</Button>
+                            <Button variant="outline" onClick={handleResetFilters} className="flex-1">{t('admin.reset')}</Button>
                         </div>
                     </div>
                 </SheetContent>
@@ -618,40 +620,40 @@ export const MapContainerPage = () => {
             <Sheet open={openSortSheet} onOpenChange={setOpenSortSheet}>
                 <SheetContent className="z-[9999]">
                     <SheetHeader>
-                        <SheetTitle>Сортировка</SheetTitle>
-                        <SheetDescription>Выберите поле и порядок сортировки</SheetDescription>
+                        <SheetTitle>{t('admin.sorting')}</SheetTitle>
+                        <SheetDescription>{t('admin.selectFieldAndSortOrder')}</SheetDescription>
                     </SheetHeader>
                     <div className="flex flex-col gap-4 py-4">
                         <div className="flex flex-col gap-2">
-                            <Label>Поле сортировки</Label>
+                            <Label>{t('admin.sortField')}</Label>
                             <Select value={sortField} onValueChange={setSortField} defaultValue="priority">
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="z-[99999]">
-                                    <SelectItem value="priority">Приоритет</SelectItem>
-                                    <SelectItem value="name">Название</SelectItem>
-                                    <SelectItem value="region">Регион</SelectItem>
-                                    <SelectItem value="technical_condition">Техническое состояние</SelectItem>
-                                    <SelectItem value="passport_date">Дата паспорта</SelectItem>
+                                        <SelectItem value="priority">{t('admin.priority')}</SelectItem>
+                                    <SelectItem value="name">{t('admin.name')}</SelectItem>
+                                    <SelectItem value="region">{t('admin.region')}</SelectItem>
+                                    <SelectItem value="technical_condition">{t('admin.technicalCondition')}</SelectItem>
+                                    <SelectItem value="passport_date">{t('admin.passportDate')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <Label>Порядок</Label>
+                            <Label>{t('admin.sortOrder')}</Label>
                             <Select value={sortOrder} onValueChange={(val: "ASC" | "DESC") => setSortOrder(val)} defaultValue="DESC">
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="z-[99999]">
-                                    <SelectItem value="ASC">По возрастанию</SelectItem>
-                                    <SelectItem value="DESC">По убыванию</SelectItem>
+                                    <SelectItem value="ASC">{t('admin.ascending')}</SelectItem>
+                                    <SelectItem value="DESC">{t('admin.descending')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
-                        <Button onClick={handleApplySort}>Применить</Button>
+                        <Button onClick={handleApplySort}>{t('admin.apply')}</Button>
                     </div>
                 </SheetContent>
             </Sheet>

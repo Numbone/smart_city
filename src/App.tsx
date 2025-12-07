@@ -12,6 +12,7 @@ import { MapContainerPage } from '@/pages/MapContainerPage'
 import { AdminPage } from '@/pages/AdminPage'
 import PrioritiesPage from '@/pages/PrioritiesPage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import '@/i18n/config'
 // Import your other pages (MapPage, AdminPage, etc.)
 const queryClient = new QueryClient({
   defaultOptions: {

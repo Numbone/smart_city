@@ -4,9 +4,11 @@ import BulbIcon from '../assets/bulb.svg'
 import BgImg from '../assets/smart.jpg'
 import { Header } from '@/components/Header'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 export const RoutingPage = () => {
     const { user } = useAuth()
+    const { t } = useTranslation()
     return (
         <div className='relative flex flex-col h-screen'>
             <Header />
@@ -31,7 +33,7 @@ export const RoutingPage = () => {
                 >
                     <img src={BulbIcon} alt="Bulb Icon" className='w-full h-20 mt-3' />
                     <div className='text-lg font-semibold mt-auto text-amber-500 text-center'>
-                        Водный объект
+                        {t('nav.waterObjects')}
                     </div>
                 </Link>
                     {
@@ -47,7 +49,7 @@ export const RoutingPage = () => {
                         >
                             <img src={AdminIcon} alt="Admin Icon" className='w-full h-20 mt-3' />
                             <div className='text-lg font-semibold mt-auto text-amber-500 text-center'>
-                                Панель администратора
+                                {t('nav.adminPanel')}
                             </div>
                         </Link>
                     )}
@@ -64,7 +66,7 @@ export const RoutingPage = () => {
                     >
                         <img src={BulbIcon} alt="Bulb Icon" className='w-full h-20 mt-3' />
                         <div className='text-lg font-semibold mt-auto text-amber-500 text-center'>
-                            Приоритеты
+                            {t('nav.priorities')}
                         </div>
                     </Link>
                 )}

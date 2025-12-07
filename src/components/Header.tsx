@@ -10,18 +10,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { useTranslation } from 'react-i18next'
 
 export const Header = () => {
   const { user, logout } = useAuth()
+  const { t } = useTranslation()
 
   return (
     <header className="absolute top-0 left-0 right-0 z-10 bg-white/10 backdrop-blur-md border-b border-white/20">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="text-2xl font-bold text-white">
-          Smart Water System
+          GidroAtlas
         </div>
 
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
@@ -35,12 +40,12 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('nav.myAccount')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/profile" className="flex items-center cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+                  <span>{t('nav.profile')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -49,7 +54,7 @@ export const Header = () => {
                 className="flex items-center cursor-pointer text-red-600"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
+                <span>{t('common.logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

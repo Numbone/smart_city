@@ -8,6 +8,8 @@ import { toast } from "react-toastify"
 import { useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { AxiosError } from "axios"
+import { useTranslation } from "react-i18next"
+import { LanguageSwitcher } from "./LanguageSwitcher"
 
 export function LoginForm({
   className,
@@ -18,7 +20,7 @@ export function LoginForm({
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isPending, setIsPending] = useState(false)
-
+  const { t } = useTranslation()
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsPending(true)
@@ -41,22 +43,20 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <LanguageSwitcher />
       <Card className="overflow-hidden">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-balance text-muted-foreground">
-                  Войдите в систему
-                </p>
+                <h1 className="text-2xl font-bold">{t('auth.welcomeBack')}</h1>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder={t('auth.emailPlaceholder')}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -65,9 +65,9 @@ export function LoginForm({
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Пароль</Label>
+                  <Label htmlFor="password">{t('auth.password')}</Label>
                   <Link to="#" className="ml-auto text-sm underline-offset-2 hover:underline">
-                    Забыли пароль?
+                    {t('auth.forgotPassword')}
                   </Link>
                 </div>
                 <Input 
@@ -84,12 +84,12 @@ export function LoginForm({
                 className="w-full"
                 disabled={isPending}
               >
-                {isPending ? 'Logging in...' : 'Login'}
+                {isPending ? t('auth.loggingIn') : t('auth.login')}
               </Button>
               <div className="text-center text-sm">
-                Нет аккаунта?{" "}
+                {t('auth.noAccount')} {" "}
                   <Link to="/register" className="underline underline-offset-4" onClick={() => navigate('/register')}>
-                  Зарегистрироваться
+                  {t('auth.register')}
                 </Link>
               </div>
             </div>
@@ -104,8 +104,8 @@ export function LoginForm({
         </CardContent>
       </Card>
       <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        {t('auth.byClickingContinue')} <a href="#">{t('auth.termsOfService')}</a>{" "}
+        {t('auth.and')} <a href="#">{t('auth.privacyPolicy')}</a>.
       </div>
     </div>
   )
